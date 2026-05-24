@@ -167,6 +167,18 @@
   .badge-work          { @apply bg-rose-100 text-rose-700; }
   .badge-relationships { @apply bg-red-100 text-red-600; }
 
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-2xl text-rose-600 transition-all;
+  }
+  .nav-item:hover {
+    @apply bg-pink-50/80 text-rose-800;
+  }
+  .nav-item-active {
+    @apply flex items-center gap-3 px-3 py-2 rounded-2xl text-rose-800 font-semibold;
+    background: linear-gradient(135deg, rgba(254,226,232,0.9), rgba(237,233,254,0.9));
+    box-shadow: 0 1px 6px rgba(200,80,150,0.1);
+  }
+
   .section-label {
     @apply text-xs font-black uppercase tracking-widest;
     color: rgba(200, 80, 140, 0.7);

@@ -132,49 +132,61 @@ export default function Dashboard() {
       </div>
 
       {/* Character card */}
-      <div className="card p-5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-purple-50 opacity-50" />
-        <div className="relative">
+      <div className="relative overflow-hidden rounded-3xl" style={{
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.92), rgba(250,244,255,0.9))',
+        border: '1px solid rgba(220,160,220,0.2)',
+        boxShadow: '0 4px 32px rgba(200,80,150,0.1), 0 1px 4px rgba(0,0,0,0.04)',
+      }}>
+        {/* Top gradient stripe */}
+        <div className="h-1 w-full bg-gradient-to-r from-pink-400 via-fuchsia-400 to-purple-500"/>
+
+        {/* Background glow shapes */}
+        <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20 blur-3xl" style={{ background: 'radial-gradient(circle, #f0abfc, transparent)' }}/>
+        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full opacity-15 blur-3xl" style={{ background: 'radial-gradient(circle, #fda4af, transparent)' }}/>
+
+        <div className="relative p-5">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center text-white text-2xl font-black shadow-glow-purple">
-              {user.name?.[0] || 'S'}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-baseline gap-2">
-                <h2 className="font-display text-xl font-bold text-rose-950">{user.name}</h2>
-                <span className="text-xs text-purple-500 font-semibold bg-purple-100 px-2 py-0.5 rounded-full">Lv {user.level}</span>
+            <div className="relative flex-shrink-0">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center text-white text-2xl font-black"
+                style={{ boxShadow: '0 4px 16px rgba(168,85,247,0.4)' }}>
+                {user.name?.[0] || 'S'}
               </div>
-              <p className="text-xs text-rose-500">{getLevelTitle(user.level)} · {user.avatarClass}</p>
+              {/* Level badge */}
+              <div className="absolute -bottom-1.5 -right-1.5 bg-gradient-to-br from-amber-400 to-orange-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-md">
+                {user.level}
+              </div>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-black text-amber-500">🪙 {user.coins}</p>
-              <p className="text-xs text-rose-400">coins</p>
+            <div className="flex-1 min-w-0">
+              <h2 className="font-display text-xl font-bold text-rose-950 leading-tight">{user.name}</h2>
+              <p className="text-xs text-purple-500 mt-0.5">{getLevelTitle(user.level)} · {user.avatarClass}</p>
+            </div>
+            <div className="flex-shrink-0 text-right">
+              <p className="text-xl font-black text-amber-500 leading-none">🪙 {user.coins}</p>
+              <p className="text-xs text-rose-300 mt-0.5">coins</p>
             </div>
           </div>
 
-          {/* XP bar */}
-          <div className="mb-1">
-            <XPBar xp={user.xp} needed={xpNeeded} />
-          </div>
-          <div className="flex justify-between text-xs text-rose-400">
-            <span>{user.xp} / {xpNeeded} XP</span>
-            <span>{xpPct}% to Level {user.level + 1}</span>
+          {/* XP section */}
+          <div className="mb-3">
+            <div className="flex justify-between text-xs mb-1.5">
+              <span className="text-rose-400 font-semibold">{user.xp} / {xpNeeded} XP</span>
+              <span className="text-purple-400 font-semibold">{xpPct}% → Lv {user.level + 1}</span>
+            </div>
+            <XPBar xp={user.xp} needed={xpNeeded}/>
           </div>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-3 gap-3 mt-4">
-            <div className="bg-white/60 rounded-2xl p-2.5 text-center">
-              <p className="text-lg font-black text-pink-500">{completedToday}</p>
-              <p className="text-xs text-rose-400">done today</p>
-            </div>
-            <div className="bg-white/60 rounded-2xl p-2.5 text-center">
-              <p className="text-lg font-black text-purple-500">{activeQuests.length}</p>
-              <p className="text-xs text-rose-400">active quests</p>
-            </div>
-            <div className="bg-white/60 rounded-2xl p-2.5 text-center">
-              <p className="text-lg font-black text-amber-500">{habitsToday}</p>
-              <p className="text-xs text-rose-400">habits done</p>
-            </div>
+          <div className="grid grid-cols-3 gap-2.5 mt-3">
+            {[
+              { val: completedToday,     label: 'done today',    color: 'text-pink-500',   bg: 'from-pink-50   to-rose-50'  },
+              { val: activeQuests.length, label: 'quests open',  color: 'text-violet-500', bg: 'from-violet-50 to-purple-50'},
+              { val: habitsToday,         label: 'habits done',  color: 'text-amber-500',  bg: 'from-amber-50  to-yellow-50'},
+            ].map(s => (
+              <div key={s.label} className={`bg-gradient-to-br ${s.bg} rounded-2xl p-2.5 text-center border border-white/60`}>
+                <p className={`text-xl font-black ${s.color}`}>{s.val}</p>
+                <p className="text-[11px] text-rose-400 leading-tight mt-0.5">{s.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
