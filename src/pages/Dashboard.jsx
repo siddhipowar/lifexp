@@ -62,11 +62,11 @@ export default function Dashboard() {
     <div className="space-y-6 animate-fade-in pb-20 md:pb-0">
       {/* Header */}
       <div>
-        <p className="text-pink-400 text-sm font-semibold">
-          {getGreeting()}, {user.name?.split(' ')[0]} ✨
+        <p className="text-pink-400 text-sm font-semibold tracking-wide">
+          {getGreeting()}, {user.name?.split(' ')[0]}
         </p>
         <h1 className="font-display text-3xl font-bold text-rose-950 leading-tight">
-          {hasMoodToday ? 'Ready for your quests?' : 'How are you feeling today?'}
+          {hasMoodToday ? getMotivationalHeader(user.moodToday) : 'how are you feeling right now?'}
         </h1>
       </div>
 
@@ -84,7 +84,7 @@ export default function Dashboard() {
           <div className="card p-5 flex-1">
             <div className="flex items-center gap-2 mb-3">
               <Clock size={14} className="text-pink-400" />
-              <p className="text-xs font-bold text-pink-400 uppercase tracking-wider">Yesterday's report</p>
+              <p className="text-xs font-bold text-pink-400 uppercase tracking-wider">Yesterday</p>
             </div>
             <div className="grid grid-cols-2 gap-3 mb-3">
               <div className="bg-green-50 rounded-2xl p-3 text-center">
@@ -110,7 +110,7 @@ export default function Dashboard() {
             {/* Missed quests */}
             {yesterdaySummary.missedTitles?.length > 0 && (
               <div>
-                <p className="text-xs text-rose-500 font-semibold mb-1">Rolled over to today:</p>
+                <p className="text-xs text-rose-500 font-semibold mb-1">didn't finish:</p>
                 {yesterdaySummary.missedTitles.slice(0, 3).map((t, i) => (
                   <p key={i} className="text-xs text-rose-400 truncate">→ {t}</p>
                 ))}
@@ -123,9 +123,9 @@ export default function Dashboard() {
         ) : (
           <div className="card p-5 flex-1 flex items-center justify-center">
             <div className="text-center">
-              <p className="text-2xl mb-2">📊</p>
-              <p className="text-sm font-semibold text-rose-700">Yesterday's report</p>
-              <p className="text-xs text-rose-400 mt-1">Will appear after your first full day</p>
+              <p className="text-2xl mb-2">🌙</p>
+              <p className="text-sm font-semibold text-rose-700">No report yet</p>
+              <p className="text-xs text-rose-400 mt-1">Shows up after your first full day</p>
             </div>
           </div>
         )}
@@ -182,7 +182,7 @@ export default function Dashboard() {
       {/* Mood check-in */}
       {!hasMoodToday && (
         <div className="card p-5 animate-slide-up">
-          <p className="text-sm font-semibold text-rose-900 mb-4">Quick check-in — how's your energy?</p>
+          <p className="text-sm font-semibold text-rose-900 mb-4">what's your energy like right now?</p>
           <div className="flex gap-2 justify-between">
             {MOODS.map(m => (
               <button
@@ -203,7 +203,7 @@ export default function Dashboard() {
           <span className="text-lg">{MOODS.find(m => m.value === user.moodToday)?.emoji}</span>
           <span className="text-sm text-rose-700">
             Today's energy: <strong>{MOODS.find(m => m.value === user.moodToday)?.label}</strong>
-            {user.moodToday <= 2 && ' — I moved your harder quests to tomorrow. Just one thing today.'}
+            {user.moodToday <= 2 && ' — let\'s keep it light. just one thing today.'}
           </span>
         </div>
       )}
@@ -212,13 +212,13 @@ export default function Dashboard() {
       {activeQuests.length > 0 && (
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-rose-700">
-            {justOneMode ? "✨ Just this one thing:" : "Today's focus"}
+            {justOneMode ? "✨ just this one:" : "your focus"}
           </p>
           <button
             onClick={() => setJustOneMode(!justOneMode)}
             className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all ${justOneMode ? 'bg-purple-100 text-purple-600' : 'bg-pink-50 text-pink-500 hover:bg-pink-100'}`}
           >
-            {justOneMode ? 'Show all' : '😵 Overwhelmed? Just 1 thing'}
+            {justOneMode ? 'show everything' : '😵 overwhelmed? one thing'}
           </button>
         </div>
       )}
@@ -228,7 +228,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Heart size={14} className="text-purple-500" />
-            <p className="text-xs font-bold text-purple-500 uppercase tracking-wider">Daily Soul Quest</p>
+            <p className="text-xs font-bold text-purple-500 uppercase tracking-wider">soul quest</p>
           </div>
           <QuestCard quest={soulQuest} />
         </div>
@@ -242,7 +242,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Zap size={14} className="text-pink-500" />
-              <p className="text-xs font-bold text-pink-500 uppercase tracking-wider">Top quests today</p>
+              <p className="text-xs font-bold text-pink-500 uppercase tracking-wider">up next</p>
             </div>
             <button onClick={() => navigate('/app/quests')} className="text-xs text-purple-500 hover:text-purple-700 flex items-center gap-1">
               View all <ArrowRight size={12} />
@@ -255,10 +255,10 @@ export default function Dashboard() {
           ) : (
             <div className="card p-6 text-center">
               <p className="text-2xl mb-2">🎉</p>
-              <p className="text-sm font-semibold text-rose-700">All caught up!</p>
-              <p className="text-xs text-rose-400 mt-1">Add more from the Master Document</p>
+              <p className="text-sm font-semibold text-rose-700">you're clear ✓</p>
+              <p className="text-xs text-rose-400 mt-1">drop more into the brain dump whenever</p>
               <button onClick={() => navigate('/app/my-life')} className="btn-ghost text-xs px-4 py-2 mt-3">
-                Open My Life
+                open brain dump
               </button>
             </div>
           )}
@@ -269,8 +269,8 @@ export default function Dashboard() {
       {user.identityAnchors?.length > 0 && (
         <div className="bg-soul-gradient rounded-3xl p-5 border border-purple-100">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-purple-400 text-sm">✨</span>
-            <p className="text-xs font-bold text-purple-500 uppercase tracking-wider">Who you are</p>
+            <span className="text-purple-400 text-sm">✦</span>
+            <p className="text-xs font-bold text-purple-500 uppercase tracking-wider">who you are</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {user.identityAnchors.map((anchor, i) => (
@@ -287,9 +287,15 @@ export default function Dashboard() {
 
 function getGreeting() {
   const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
+  if (h < 12) return 'good morning'
+  if (h < 17) return 'hey'
+  return 'good evening'
+}
+
+function getMotivationalHeader(mood) {
+  if (mood >= 4) return "let's make today count."
+  if (mood === 3) return "one step at a time."
+  return "we keep it gentle today."
 }
 
 function getAvatarLabel(score) {
