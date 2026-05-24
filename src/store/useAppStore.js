@@ -228,6 +228,25 @@ export const useAppStore = create(
 
       resetOnboarding: () => set({ user: defaultUser }),
     }),
-    { name: 'lifexp-store', version: 2 }
+    {
+      name: 'lifexp-store',
+      version: 2,
+      migrate: (saved, fromVersion) => {
+        // Always merge saved state with current defaults — never wipe
+        return {
+          ...saved,
+          user: { ...defaultUser, ...saved.user },
+          quests:         saved.quests         ?? [],
+          habits:         saved.habits         ?? [],
+          calendarEvents: saved.calendarEvents ?? [],
+          soulEntries:    saved.soulEntries    ?? [],
+          dailySummaries: saved.dailySummaries ?? [],
+          impulseChecks:  saved.impulseChecks  ?? [],
+          shopItems:      saved.shopItems      ?? [],
+          guideMessages:  saved.guideMessages  ?? [],
+          notifications:  saved.notifications  ?? [],
+        }
+      },
+    }
   )
 )

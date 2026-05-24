@@ -320,51 +320,29 @@ export default function Avatar3D({ score = 70, size = 160 }) {
           <text x="93" y="205" fontSize="11" fill="white" opacity="0.7">♡</text>
         )}
 
-        {/* ── ARMS ── */}
-        {/* Left arm */}
-        <rect
-          x="18" y="166" width="30" height="54" rx="15"
-          fill={cfg.outfit}
-          transform={
-            score >= 80 ? 'rotate(-40 33 166)' :
-            score >= 60 ? 'rotate(-28 33 166)' :
-            score >= 40 ? 'rotate(-12 33 166)' :
-            'rotate(6 33 166)'
-          }
-        />
-        {/* Left hand */}
-        <ellipse
-          cx="22" cy="197" rx="9" ry="9"
-          fill={cfg.skin}
-          transform={
-            score >= 80 ? 'rotate(-40 33 166)' :
-            score >= 60 ? 'rotate(-28 33 166)' :
-            score >= 40 ? 'rotate(-12 33 166)' :
-            'rotate(6 33 166)'
-          }
-        />
-        {/* Right arm */}
-        <rect
-          x="152" y="166" width="30" height="54" rx="15"
-          fill={cfg.outfit}
-          transform={
-            score >= 80 ? 'rotate(40 167 166)' :
-            score >= 60 ? 'rotate(28 167 166)' :
-            score >= 40 ? 'rotate(12 167 166)' :
-            'rotate(-6 167 166)'
-          }
-        />
-        {/* Right hand */}
-        <ellipse
-          cx="178" cy="197" rx="9" ry="9"
-          fill={cfg.skin}
-          transform={
-            score >= 80 ? 'rotate(40 167 166)' :
-            score >= 60 ? 'rotate(28 167 166)' :
-            score >= 40 ? 'rotate(12 167 166)' :
-            'rotate(-6 167 166)'
-          }
-        />
+        {/* ── ARMS + HANDS (grouped so hand stays at arm tip) ── */}
+        <g transform={
+          score >= 80 ? 'rotate(-40 33 166)' :
+          score >= 60 ? 'rotate(-28 33 166)' :
+          score >= 40 ? 'rotate(-12 33 166)' :
+          'rotate(6 33 166)'
+        }>
+          <rect x="18" y="166" width="30" height="52" rx="15" fill={cfg.outfit}/>
+          {/* Hand: circle centered at bottom of arm rect */}
+          <circle cx="33" cy="220" r="13" fill={cfg.skin}/>
+          <circle cx="33" cy="220" r="10" fill={cfg.skinShade} opacity="0.25"/>
+        </g>
+
+        <g transform={
+          score >= 80 ? 'rotate(40 167 166)' :
+          score >= 60 ? 'rotate(28 167 166)' :
+          score >= 40 ? 'rotate(12 167 166)' :
+          'rotate(-6 167 166)'
+        }>
+          <rect x="152" y="166" width="30" height="52" rx="15" fill={cfg.outfit}/>
+          <circle cx="167" cy="220" r="13" fill={cfg.skin}/>
+          <circle cx="167" cy="220" r="10" fill={cfg.skinShade} opacity="0.25"/>
+        </g>
 
         {/* ── SPARKLES (ecstatic / happy) ── */}
         {cfg.sparkles && (
