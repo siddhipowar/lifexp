@@ -3,6 +3,7 @@ import { useAppStore } from '../store/useAppStore'
 import { Plus, Heart, Minus, BookOpen, TrendingUp, Shield } from 'lucide-react'
 import { callClaudeJSON } from '../lib/claude'
 import { SOUL_REFLECTION_SYSTEM } from '../lib/prompts'
+import ImpulseCheck from '../components/ImpulseCheck'
 
 export default function Soul() {
   const user = useAppStore((s) => s.user)
@@ -19,6 +20,8 @@ export default function Soul() {
   const [logSubmitting, setLogSubmitting] = useState(false)
   const [reflection, setReflection] = useState(null)
   const [reflecting, setReflecting] = useState(false)
+  const [impulseOpen, setImpulseOpen] = useState(false)
+  const impulseChecks = useAppStore((s) => s.impulseChecks)
 
   const today = new Date().toISOString().split('T')[0]
   const todayEntry = soulEntries.find(e => e.date === today)
@@ -84,6 +87,7 @@ export default function Soul() {
     { id: 'meter', label: '⚖️ Balance', icon: TrendingUp },
     { id: 'tracker', label: '📓 Patterns', icon: BookOpen },
     { id: 'quests', label: '✨ Quests', icon: Heart },
+    { id: 'impulse', label: '🚨 Impulse', icon: Shield },
   ]
 
   return (
@@ -318,6 +322,79 @@ export default function Soul() {
           </div>
         </div>
       )}
+
+      {/* Impulse Check */}
+      {activeTab === 'impulse' && (
+        <div className="space-y-4 animate-fade-in">
+          <div className="card p-5">
+            <h2 className="font-display text-xl font-bold text-rose-950 mb-2">Impulse Check</h2>
+            <p className="text-sm text-rose-500 mb-5">Pause before you act on something you might regret. Describe the impulse — I'll help you see it clearly.</p>
+
+            <button
+              onClick={() => setImpulseOpen(true)}
+              className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base"
+            >
+              🚨 Check an impulse right now
+            </button>
+
+            <p className="text-xs text-center text-rose-400 mt-3">Also available as the 🚨 button in the corner of every page.</p>
+          </div>
+
+          {/* Recent impulse checks */}
+          {impulseChecks.length > 0 && (
+            <div className="card p-5">
+              <p className="text-xs font-bold text-rose-500 uppercase tracking-wider mb-3">Recent checks ({impulseChecks.length})</p>
+              <div className="space-y-3">
+                {impulseChecks.slice(0, 5).map(check => {
+                  const verdictIcon = { PAUSE: '🛑', REFLECT: '⏸️', PROCEED: '✅' }[check.result?.verdict] || '⏸️'
+                  const verdictColor = { PAUSE: 'text-red-600', REFLECT: 'text-amber-600', PROCEED: 'text-emerald-600' }[check.result?.verdict] || 'text-amber-600'
+                  const date = new Date(check.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                  return (
+                    <div key={check.id} className="bg-pink-50 rounded-2xl p-3 border border-pink-100">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold text-rose-600">{verdictIcon} <span className={verdictColor}>{check.result?.verdict}</span></span>
+                        <span className="text-xs text-rose-400">{date}</span>
+                      </div>
+                      <p className="text-xs text-rose-700 italic truncate">"{check.impulse}"</p>
+                      {check.result?.oneAction && (
+                        <p className="text-xs text-purple-600 mt-1 font-medium">→ {check.result.oneAction}</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <button
+                onClick={() => setImpulseOpen(true)}
+                className="text-xs text-purple-500 hover:text-purple-700 mt-3 w-full text-center"
+              >
+                View full history →
+              </button>
+            </div>
+          )}
+
+          {/* Pattern summary if enough checks */}
+          {impulseChecks.length >= 3 && (
+            <div className="bg-soul-gradient rounded-3xl p-5 border border-purple-100">
+              <p className="text-xs font-bold text-purple-500 uppercase tracking-wider mb-3">Your impulse patterns</p>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {['PAUSE', 'REFLECT', 'PROCEED'].map(v => {
+                  const count = impulseChecks.filter(c => c.result?.verdict === v).length
+                  const icon = { PAUSE: '🛑', REFLECT: '⏸️', PROCEED: '✅' }[v]
+                  return (
+                    <div key={v} className="bg-white/60 rounded-2xl p-3">
+                      <p className="text-xl">{icon}</p>
+                      <p className="text-lg font-black text-rose-900">{count}</p>
+                      <p className="text-xs text-rose-500">{v.toLowerCase()}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {impulseOpen && <ImpulseCheck onClose={() => setImpulseOpen(false)} />}
 
       {/* Soul Quests */}
       {activeTab === 'quests' && (

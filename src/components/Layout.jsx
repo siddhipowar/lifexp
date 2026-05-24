@@ -3,6 +3,7 @@ import { useAppStore } from '../store/useAppStore'
 import { Home, Sword, Sparkles, Heart, MessageCircle, FileText, ShoppingBag, User, CalendarDays, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import XPBar from './XPBar'
+import ImpulseCheck from './ImpulseCheck'
 
 const navItems = [
   { to: '/app/dashboard', icon: Home,          label: 'Home' },
@@ -20,6 +21,7 @@ export default function Layout() {
   const user = useAppStore((s) => s.user)
   const xpNeeded = useAppStore((s) => s.xpNeeded)()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [impulseOpen, setImpulseOpen] = useState(false)
 
   return (
     <div className="min-h-screen flex bg-cozy-gradient cozy-pattern">
@@ -119,6 +121,17 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      {/* Impulse Check floating button */}
+      <button
+        onClick={() => setImpulseOpen(true)}
+        title="Impulse Check — pause before you act"
+        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-110 transition-all flex items-center justify-center text-xl"
+      >
+        🚨
+      </button>
+
+      {impulseOpen && <ImpulseCheck onClose={() => setImpulseOpen(false)} />}
 
       {/* Mobile bottom nav */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 glass border-t border-pink-100 flex justify-around py-2 px-2">

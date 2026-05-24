@@ -39,6 +39,7 @@ export const useAppStore = create(
       ],
       guideMessages: [],
       notifications: [],
+      impulseChecks: [],
 
       // ─── Daily reset (call on app load) ───────────────────────────────────────
       checkDailyReset: () => {
@@ -215,6 +216,11 @@ export const useAppStore = create(
       // ─── Guide ────────────────────────────────────────────────────────────────
       addMessage: (role, content) => set((s) => ({
         guideMessages: [...s.guideMessages, { id: Date.now().toString(), role, content, timestamp: new Date().toISOString() }]
+      })),
+
+      // ─── Impulse Checks ───────────────────────────────────────────────────────
+      addImpulseCheck: (check) => set((s) => ({
+        impulseChecks: [{ ...check, id: Date.now().toString(), timestamp: new Date().toISOString() }, ...s.impulseChecks].slice(0, 50)
       })),
 
       // ─── Notifications ────────────────────────────────────────────────────────
