@@ -1,0 +1,197 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --cozy-bg: #fff5f7;
+    --cozy-card: rgba(255, 255, 255, 0.85);
+    --cozy-border: rgba(240, 77, 128, 0.12);
+    --text-primary: #3b1f2b;
+    --text-secondary: #7c5068;
+    --text-muted: #b08090;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Nunito', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fff5f7 0%, #fae8ff 40%, #ffe8f0 70%, #fff8f1 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    line-height: 1.2;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white/80 backdrop-blur-sm rounded-3xl border border-pink-100 shadow-card;
+  }
+
+  .card-glow {
+    @apply bg-white/85 backdrop-blur-sm rounded-3xl border border-purple-100 shadow-cozy;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .card-glow:hover {
+    @apply shadow-cozy-lg;
+    transform: translateY(-2px);
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 rounded-2xl font-semibold text-white shadow-cozy transition-all;
+    background: linear-gradient(135deg, #f43f5e 0%, #a855f7 100%);
+  }
+
+  .btn-primary:hover {
+    @apply shadow-glow-pink;
+    transform: translateY(-1px);
+  }
+
+  .btn-soul {
+    @apply px-6 py-3 rounded-2xl font-semibold text-white shadow-cozy transition-all;
+    background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+  }
+
+  .btn-soul:hover {
+    @apply shadow-glow-purple;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    @apply px-5 py-2.5 rounded-2xl font-semibold border border-pink-200 text-pink-600 bg-white/60 hover:bg-pink-50 transition-all;
+  }
+
+  .xp-bar {
+    @apply h-3 rounded-full overflow-hidden bg-pink-100;
+  }
+
+  .xp-bar-fill {
+    @apply h-full rounded-full;
+    background: linear-gradient(90deg, #f43f5e, #a855f7, #6366f1);
+    transition: width 1s ease-out;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-career    { @apply bg-blue-100 text-blue-700; }
+  .badge-soul      { @apply bg-purple-100 text-purple-700; }
+  .badge-health    { @apply bg-green-100 text-green-700; }
+  .badge-learning  { @apply bg-amber-100 text-amber-700; }
+  .badge-personal  { @apply bg-pink-100 text-pink-700; }
+  .badge-work      { @apply bg-rose-100 text-rose-700; }
+  .badge-relationships { @apply bg-red-100 text-red-600; }
+
+  .section-title {
+    @apply font-display text-2xl font-bold text-rose-900 mb-6;
+  }
+
+  .nav-link {
+    @apply text-sm font-semibold text-purple-700 hover:text-pink-600 transition-colors px-3 py-2 rounded-xl hover:bg-pink-50;
+  }
+
+  .nav-link.active {
+    @apply bg-pink-100 text-pink-700;
+  }
+
+  .input-cozy {
+    @apply w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/80 text-rose-900 placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .textarea-cozy {
+    @apply w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/80 text-rose-900 placeholder-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all resize-none;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  .quest-card {
+    @apply card-glow p-5 cursor-pointer;
+  }
+
+  .quest-card.completed {
+    @apply opacity-60;
+  }
+
+  .stat-bar {
+    @apply h-2 rounded-full bg-pink-100 overflow-hidden;
+  }
+
+  .stat-bar-fill {
+    @apply h-full rounded-full transition-all duration-700;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(135deg, #f43f5e, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass {
+    @apply bg-white/70 backdrop-blur-md;
+  }
+
+  .cozy-pattern {
+    background-image: radial-gradient(circle at 20% 20%, rgba(244,63,94,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(168,85,247,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 60% 30%, rgba(251,146,60,0.03) 0%, transparent 40%);
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  .scrollbar-cozy::-webkit-scrollbar { width: 6px; }
+  .scrollbar-cozy::-webkit-scrollbar-track { background: #fff0f5; border-radius: 3px; }
+  .scrollbar-cozy::-webkit-scrollbar-thumb { background: linear-gradient(#f43f5e, #a855f7); border-radius: 3px; }
+}
+
+/* Emoji animations for celebrations */
+.confetti-burst {
+  animation: pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+}
+
+/* Floating orbs in background */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: float 8s ease-in-out infinite;
+}
