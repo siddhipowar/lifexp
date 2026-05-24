@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAppStore } from './store/useAppStore'
 import Landing from './pages/Landing'
@@ -15,7 +16,11 @@ import Calendar from './pages/Calendar'
 import Notifications from './components/Notifications'
 
 function AppRoutes() {
-  const onboardingComplete = useAppStore((s) => s.user.onboardingComplete)
+  const onboardingComplete  = useAppStore((s) => s.user.onboardingComplete)
+  const checkDailyReset     = useAppStore((s) => s.checkDailyReset)
+
+  // Run once on mount — rolls over quests if a new day has started
+  useState(() => { checkDailyReset() }, [])
 
   return (
     <Routes>

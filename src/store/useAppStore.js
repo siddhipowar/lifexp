@@ -9,14 +9,7 @@ const defaultUser = {
   level: 1,
   xp: 0,
   coins: 50,
-  stats: {
-    intelligence: 10,
-    ambition: 10,
-    discipline: 10,
-    soul: 10,
-    resilience: 10,
-    connection: 10,
-  },
+  stats: { intelligence: 10, ambition: 10, discipline: 10, soul: 10, resilience: 10, connection: 10 },
   masterDocument: '',
   onboardingComplete: false,
   moodToday: null,
@@ -34,38 +27,98 @@ export const useAppStore = create(
       habits: [],
       calendarEvents: [],
       soulEntries: [],
+      dailySummaries: [],   // { date, plannedMinutes, completedMinutes, completedCount, totalCount, missedTitles }
       shopItems: [
-        { id: 'coffee', name: 'Coffee date with yourself ☕', cost: 20, emoji: '☕', redeemed: false },
-        { id: 'movie', name: 'Movie night 🎬', cost: 40, emoji: '🎬', redeemed: false },
-        { id: 'book', name: 'New book 📚', cost: 60, emoji: '📚', redeemed: false },
-        { id: 'sushi', name: 'Sushi night 🍣', cost: 80, emoji: '🍣', redeemed: false },
-        { id: 'spa', name: 'Spa day 💆', cost: 150, emoji: '💆', redeemed: false },
-        { id: 'skincare', name: 'New skincare item 🌸', cost: 100, emoji: '🌸', redeemed: false },
-        { id: 'nails', name: 'Nail appointment 💅', cost: 90, emoji: '💅', redeemed: false },
+        { id: 'coffee',   name: 'Coffee date with yourself ☕', cost: 20,  emoji: '☕', redeemed: false },
+        { id: 'movie',    name: 'Movie night 🎬',               cost: 40,  emoji: '🎬', redeemed: false },
+        { id: 'book',     name: 'New book 📚',                  cost: 60,  emoji: '📚', redeemed: false },
+        { id: 'sushi',    name: 'Sushi night 🍣',               cost: 80,  emoji: '🍣', redeemed: false },
+        { id: 'spa',      name: 'Spa day 💆',                   cost: 150, emoji: '💆', redeemed: false },
+        { id: 'skincare', name: 'New skincare item 🌸',         cost: 100, emoji: '🌸', redeemed: false },
+        { id: 'nails',    name: 'Nail appointment 💅',          cost: 90,  emoji: '💅', redeemed: false },
       ],
       guideMessages: [],
       notifications: [],
 
-      // User actions
+      // ─── Daily reset (call on app load) ───────────────────────────────────────
+      checkDailyReset: () => {
+        const s = get()
+        const today = new Date().toISOString().split('T')[0]
+        const lastActive = s.user.lastActiveDate
+
+        // Nothing to do if we already ran today or no prior date
+        if (!lastActive || lastActive === today) {
+          // Just update lastActiveDate to today
+          set((s) => ({ user: { ...s.user, lastActiveDate: today } }))
+          return
+        }
+
+        // A new day has arrived — snapshot yesterday's performance
+        const yesterday = lastActive
+        const todayQuests = s.quests.filter(q =>
+          !q.completed && (q.scheduledDay === 'today' || q.scheduledDay === 'tomorrow')
+        )
+        const allYesterdayQuests = s.quests.filter(q =>
+          q.scheduledDay === 'today' || q.scheduledDay === 'tomorrow' ||
+          (q.completedAt && q.completedAt.startsWith(yesterday))
+        )
+        const completedYesterday = s.quests.filter(q =>
+          q.completed && q.completedAt && q.completedAt.startsWith(yesterday)
+        )
+        const missedQuests = s.quests.filter(q =>
+          !q.completed && (q.scheduledDay === 'today' || q.scheduledDay === 'tomorrow')
+        )
+
+        const plannedMinutes   = missedQuests.reduce((sum, q) => sum + (q.estimatedMinutes || 0), 0)
+                               + completedYesterday.reduce((sum, q) => sum + (q.estimatedMinutes || 0), 0)
+        const completedMinutes = completedYesterday.reduce((sum, q) => sum + (q.estimatedMinutes || 0), 0)
+
+        const summary = {
+          date: yesterday,
+          plannedMinutes,
+          completedMinutes,
+          missedMinutes: plannedMinutes - completedMinutes,
+          completedCount: completedYesterday.length,
+          totalCount: completedYesterday.length + missedQuests.length,
+          missedTitles: missedQuests.map(q => q.title),
+          completionRate: plannedMinutes > 0
+            ? Math.round((completedMinutes / plannedMinutes) * 100)
+            : 100,
+        }
+
+        // Roll over incomplete quests: today → tomorrow, tomorrow → this_week
+        const updatedQuests = s.quests.map(q => {
+          if (q.completed) return q
+          if (q.scheduledDay === 'today')     return { ...q, scheduledDay: 'tomorrow' }
+          if (q.scheduledDay === 'tomorrow')  return { ...q, scheduledDay: 'this_week' }
+          return q
+        })
+
+        set((s) => ({
+          quests: updatedQuests,
+          dailySummaries: [summary, ...s.dailySummaries].slice(0, 90), // keep 90 days
+          user: { ...s.user, lastActiveDate: today },
+        }))
+      },
+
+      // ─── User ─────────────────────────────────────────────────────────────────
       setOnboardingComplete: (name, anchors) => set((s) => ({
-        user: { ...s.user, name, onboardingComplete: true, identityAnchors: anchors }
+        user: { ...s.user, name, onboardingComplete: true, identityAnchors: anchors, lastActiveDate: new Date().toISOString().split('T')[0] }
       })),
 
-      updateMasterDocument: (text) => set((s) => ({
-        user: { ...s.user, masterDocument: text }
-      })),
+      updateMasterDocument: (text) => set((s) => ({ user: { ...s.user, masterDocument: text } })),
 
       setMoodToday: (mood) => set((s) => ({
         user: { ...s.user, moodToday: mood, lastMoodDate: new Date().toISOString().split('T')[0] }
       })),
 
       addXP: (amount, stat) => set((s) => {
-        const newXP = s.user.xp + amount
+        const newXP    = s.user.xp + amount
         const xpNeeded = LEVEL_XP(s.user.level)
         const leveledUp = newXP >= xpNeeded
-        const newLevel = leveledUp ? s.user.level + 1 : s.user.level
-        const finalXP = leveledUp ? newXP - xpNeeded : newXP
-        const newStats = stat
+        const newLevel  = leveledUp ? s.user.level + 1 : s.user.level
+        const finalXP   = leveledUp ? newXP - xpNeeded : newXP
+        const newStats  = stat
           ? { ...s.user.stats, [stat]: Math.min(100, (s.user.stats[stat] || 0) + Math.floor(amount / 10)) }
           : s.user.stats
         const notification = leveledUp
@@ -77,13 +130,11 @@ export const useAppStore = create(
         }
       }),
 
-      addCoins: (amount) => set((s) => ({
-        user: { ...s.user, coins: s.user.coins + amount }
-      })),
+      addCoins: (amount) => set((s) => ({ user: { ...s.user, coins: s.user.coins + amount } })),
 
       xpNeeded: () => LEVEL_XP(get().user.level),
 
-      // Quests
+      // ─── Quests ───────────────────────────────────────────────────────────────
       setQuests: (quests) => set({ quests }),
 
       addQuest: (quest) => set((s) => ({
@@ -95,17 +146,17 @@ export const useAppStore = create(
         if (!quest || quest.completed) return s
         const xpMap = { soul: 'soul', career: 'ambition', learning: 'intelligence', health: 'discipline', work: 'ambition', personal: 'resilience', relationships: 'connection' }
         const notification = { id: Date.now(), type: 'xp', message: `+${quest.xp} XP ✨ +${quest.coins} 🪙`, questTitle: quest.title }
+        const newXP     = s.user.xp + quest.xp
+        const xpNeeded  = LEVEL_XP(s.user.level)
+        const leveledUp = newXP >= xpNeeded
         return {
           quests: s.quests.map((q) => q.id === id ? { ...q, completed: true, completedAt: new Date().toISOString() } : q),
           user: {
             ...s.user,
-            xp: (() => { const nx = s.user.xp + quest.xp; const xn = LEVEL_XP(s.user.level); return nx >= xn ? nx - xn : nx })(),
-            level: s.user.xp + quest.xp >= LEVEL_XP(s.user.level) ? s.user.level + 1 : s.user.level,
+            xp:    leveledUp ? newXP - xpNeeded : newXP,
+            level: leveledUp ? s.user.level + 1 : s.user.level,
             coins: s.user.coins + quest.coins,
-            stats: {
-              ...s.user.stats,
-              [xpMap[quest.category] || 'resilience']: Math.min(100, (s.user.stats[xpMap[quest.category] || 'resilience'] || 0) + Math.floor(quest.xp / 10))
-            }
+            stats: { ...s.user.stats, [xpMap[quest.category] || 'resilience']: Math.min(100, (s.user.stats[xpMap[quest.category] || 'resilience'] || 0) + Math.floor(quest.xp / 10)) }
           },
           notifications: [...s.notifications, notification],
         }
@@ -113,10 +164,9 @@ export const useAppStore = create(
 
       deleteQuest: (id) => set((s) => ({ quests: s.quests.filter((q) => q.id !== id) })),
 
-      // Habits
-      setHabits: (habits) => set({ habits }),
-
-      deleteHabit: (id) => set((s) => ({ habits: s.habits.filter((h) => h.id !== id) })),
+      // ─── Habits ───────────────────────────────────────────────────────────────
+      setHabits:    (habits) => set({ habits }),
+      deleteHabit:  (id) => set((s) => ({ habits: s.habits.filter((h) => h.id !== id) })),
 
       addHabit: (habit) => set((s) => ({
         habits: [...s.habits, { ...habit, id: Date.now().toString(), currentStreak: 0, longestStreak: 0, completedDates: [] }]
@@ -132,35 +182,23 @@ export const useAppStore = create(
               return { ...h, completedDates: h.completedDates.filter((d) => d !== today), currentStreak: Math.max(0, h.currentStreak - 1) }
             }
             const newStreak = h.currentStreak + 1
-            return {
-              ...h,
-              completedDates: [...h.completedDates, today],
-              currentStreak: newStreak,
-              longestStreak: Math.max(h.longestStreak, newStreak),
-            }
+            return { ...h, completedDates: [...h.completedDates, today], currentStreak: newStreak, longestStreak: Math.max(h.longestStreak, newStreak) }
           }),
         }
       }),
 
-      // Soul entries
+      // ─── Soul ─────────────────────────────────────────────────────────────────
       addSoulEntry: (entry) => set((s) => ({
         soulEntries: [...s.soulEntries, { ...entry, id: Date.now().toString(), date: new Date().toISOString().split('T')[0] }]
       })),
 
-      updateIdentityAnchors: (anchors) => set((s) => ({
-        user: { ...s.user, identityAnchors: anchors }
-      })),
+      updateIdentityAnchors: (anchors) => set((s) => ({ user: { ...s.user, identityAnchors: anchors } })),
 
-      // Calendar
-      addCalendarEvent: (event) => set((s) => ({
-        calendarEvents: [...s.calendarEvents, { ...event, id: Date.now().toString() }]
-      })),
+      // ─── Calendar ─────────────────────────────────────────────────────────────
+      addCalendarEvent:    (event) => set((s) => ({ calendarEvents: [...s.calendarEvents, { ...event, id: Date.now().toString() }] })),
+      deleteCalendarEvent: (id)    => set((s) => ({ calendarEvents: s.calendarEvents.filter((e) => e.id !== id) })),
 
-      deleteCalendarEvent: (id) => set((s) => ({
-        calendarEvents: s.calendarEvents.filter((e) => e.id !== id)
-      })),
-
-      // Shop
+      // ─── Shop ─────────────────────────────────────────────────────────────────
       redeemShopItem: (id) => set((s) => {
         const item = s.shopItems.find((i) => i.id === id)
         if (!item || s.user.coins < item.cost) return s
@@ -174,17 +212,16 @@ export const useAppStore = create(
         shopItems: [...s.shopItems, { ...item, id: Date.now().toString(), redeemed: false }]
       })),
 
-      // Guide chat
+      // ─── Guide ────────────────────────────────────────────────────────────────
       addMessage: (role, content) => set((s) => ({
         guideMessages: [...s.guideMessages, { id: Date.now().toString(), role, content, timestamp: new Date().toISOString() }]
       })),
 
-      clearNotification: (id) => set((s) => ({
-        notifications: s.notifications.filter((n) => n.id !== id)
-      })),
+      // ─── Notifications ────────────────────────────────────────────────────────
+      clearNotification: (id) => set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
 
       resetOnboarding: () => set({ user: defaultUser }),
     }),
-    { name: 'lifexp-store', version: 1 }
+    { name: 'lifexp-store', version: 2 }
   )
 )

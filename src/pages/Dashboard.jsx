@@ -3,7 +3,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import QuestCard from '../components/QuestCard'
 import XPBar from '../components/XPBar'
-import { Zap, Heart, Flame, ArrowRight } from 'lucide-react'
+import Avatar3D from '../components/Avatar3D'
+import { Zap, Heart, Flame, ArrowRight, Clock } from 'lucide-react'
 
 const MOODS = [
   { value: 1, emoji: '😴', label: 'Drained' },
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const [justOneMode, setJustOneMode] = useState(false)
 
+  const dailySummaries = useAppStore((s) => s.dailySummaries)
   const today = new Date().toISOString().split('T')[0]
   const hasMoodToday = user.lastMoodDate === today
   const activeQuests = quests.filter(q => !q.completed)
@@ -38,6 +40,21 @@ export default function Dashboard() {
   const justOne = activeQuests.sort((a, b) => a.priority - b.priority)[0]
   const completedToday = quests.filter(q => q.completed && q.completedAt?.startsWith(today)).length
   const habitsToday = habits.filter(h => h.completedDates?.includes(today)).length
+  const totalTodayQuests = completedToday + activeQuests.filter(q => q.scheduledDay === 'today').length
+
+  // Mood score 0–100 driving the avatar
+  const questScore   = totalTodayQuests > 0 ? (completedToday / totalTodayQuests) * 40 : 20
+  const habitScore   = habits.length > 0 ? (habitsToday / habits.length) * 30 : 15
+  const moodScore    = user.moodToday ? ((user.moodToday - 1) / 4) * 20 : 10
+  const soulScore    = (() => {
+    const todaySoul = dailySummaries[0]?.date === today ? 10 : 0
+    const soulDone  = quests.filter(q => q.category === 'soul' && q.completed && q.completedAt?.startsWith(today)).length
+    return soulDone > 0 ? 10 : 5
+  })()
+  const avatarScore  = Math.round(questScore + habitScore + moodScore + soulScore)
+
+  // Yesterday's summary
+  const yesterdaySummary = dailySummaries[0]
 
   const xpPct = Math.round((user.xp / xpNeeded) * 100)
 
@@ -51,6 +68,67 @@ export default function Dashboard() {
         <h1 className="font-display text-3xl font-bold text-rose-950 leading-tight">
           {hasMoodToday ? 'Ready for your quests?' : 'How are you feeling today?'}
         </h1>
+      </div>
+
+      {/* Avatar + yesterday summary */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* 3D Avatar */}
+        <div className="card p-4 flex flex-col items-center justify-center flex-shrink-0">
+          <Avatar3D score={avatarScore} size={160} />
+          <p className="text-xs font-bold text-purple-500 mt-1">{getAvatarLabel(avatarScore)}</p>
+          <p className="text-xs text-rose-400 mt-0.5">based on today so far</p>
+        </div>
+
+        {/* Yesterday's time analysis */}
+        {yesterdaySummary ? (
+          <div className="card p-5 flex-1">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock size={14} className="text-pink-400" />
+              <p className="text-xs font-bold text-pink-400 uppercase tracking-wider">Yesterday's report</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="bg-green-50 rounded-2xl p-3 text-center">
+                <p className="text-lg font-black text-green-600">{yesterdaySummary.completedMinutes}m</p>
+                <p className="text-xs text-green-500">time invested</p>
+              </div>
+              <div className={`rounded-2xl p-3 text-center ${yesterdaySummary.missedMinutes > 0 ? 'bg-red-50' : 'bg-pink-50'}`}>
+                <p className={`text-lg font-black ${yesterdaySummary.missedMinutes > 0 ? 'text-red-500' : 'text-pink-400'}`}>
+                  {yesterdaySummary.missedMinutes}m
+                </p>
+                <p className={`text-xs ${yesterdaySummary.missedMinutes > 0 ? 'text-red-400' : 'text-pink-400'}`}>
+                  {yesterdaySummary.missedMinutes > 0 ? 'not used' : 'nothing missed'}
+                </p>
+              </div>
+            </div>
+
+            {/* Completion bar */}
+            <div className="xp-bar mb-1">
+              <div className="xp-bar-fill" style={{ width: `${yesterdaySummary.completionRate}%` }} />
+            </div>
+            <p className="text-xs text-rose-400 mb-2">{yesterdaySummary.completionRate}% of planned time used · {yesterdaySummary.completedCount}/{yesterdaySummary.totalCount} quests</p>
+
+            {/* Missed quests */}
+            {yesterdaySummary.missedTitles?.length > 0 && (
+              <div>
+                <p className="text-xs text-rose-500 font-semibold mb-1">Rolled over to today:</p>
+                {yesterdaySummary.missedTitles.slice(0, 3).map((t, i) => (
+                  <p key={i} className="text-xs text-rose-400 truncate">→ {t}</p>
+                ))}
+                {yesterdaySummary.missedTitles.length > 3 && (
+                  <p className="text-xs text-rose-300">+{yesterdaySummary.missedTitles.length - 3} more</p>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="card p-5 flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-2xl mb-2">📊</p>
+              <p className="text-sm font-semibold text-rose-700">Yesterday's report</p>
+              <p className="text-xs text-rose-400 mt-1">Will appear after your first full day</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Character card */}
@@ -212,4 +290,12 @@ function getGreeting() {
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
+}
+
+function getAvatarLabel(score) {
+  if (score >= 80) return 'Glowing ✨'
+  if (score >= 60) return 'Happy 🌸'
+  if (score >= 40) return 'Okay 🌿'
+  if (score >= 20) return 'Low 😔'
+  return 'Drained 😴'
 }
