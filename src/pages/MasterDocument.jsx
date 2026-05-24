@@ -58,7 +58,10 @@ export default function MasterDocument() {
         completed: false,
       })
     }
-    setQuests([...quests.filter(q => q.completed), ...newQuests])
+    // Merge: keep all existing quests, add only new ones not already present by title
+    const existingTitles = new Set(quests.map(q => q.title.toLowerCase()))
+    const dedupedNew = newQuests.filter(q => !existingTitles.has(q.title.toLowerCase()))
+    setQuests([...quests, ...dedupedNew])
     if (result.habits?.length) {
       setHabits([...habits, ...result.habits.map(h => ({
         ...h,
