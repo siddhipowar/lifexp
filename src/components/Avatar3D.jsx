@@ -49,7 +49,7 @@ const ANIM_STYLES = `
 function getMoodConfig(score) {
   if (score >= 80) return {
     skin: '#fde8d8', skinShade: '#f9c5a5',
-    hair: '#2d1b69', hairShine: '#4c1d95',
+    hair: '#111827', hairShine: '#1e293b',
     outfit: '#f472b6', outfitShade: '#db2777', outfitLight: '#fbcfe8',
     eyeColor: '#7c3aed', irisLight: '#a78bfa',
     cheek: '#f87171', cheekOpacity: 0.55,
@@ -61,7 +61,7 @@ function getMoodConfig(score) {
   }
   if (score >= 60) return {
     skin: '#fde8d8', skinShade: '#f9c5a5',
-    hair: '#2d1b69', hairShine: '#4c1d95',
+    hair: '#111827', hairShine: '#1e293b',
     outfit: '#fb7185', outfitShade: '#e11d48', outfitLight: '#fecdd3',
     eyeColor: '#7c3aed', irisLight: '#a78bfa',
     cheek: '#fca5a5', cheekOpacity: 0.5,
@@ -73,7 +73,7 @@ function getMoodConfig(score) {
   }
   if (score >= 40) return {
     skin: '#fde8d8', skinShade: '#f9c5a5',
-    hair: '#2d1b69', hairShine: '#4c1d95',
+    hair: '#111827', hairShine: '#1e293b',
     outfit: '#c084fc', outfitShade: '#9333ea', outfitLight: '#e9d5ff',
     eyeColor: '#6d28d9', irisLight: '#8b5cf6',
     cheek: '#d8b4fe', cheekOpacity: 0.4,
@@ -85,7 +85,7 @@ function getMoodConfig(score) {
   }
   if (score >= 20) return {
     skin: '#e8d5c4', skinShade: '#d4bfad',
-    hair: '#1e1b4b', hairShine: '#312e81',
+    hair: '#111827', hairShine: '#1e293b',
     outfit: '#94a3b8', outfitShade: '#64748b', outfitLight: '#cbd5e1',
     eyeColor: '#475569', irisLight: '#64748b',
     cheek: '#cbd5e1', cheekOpacity: 0.3,
@@ -97,7 +97,7 @@ function getMoodConfig(score) {
   }
   return {
     skin: '#ddd0c4', skinShade: '#c4b5a8',
-    hair: '#1e1b4b', hairShine: '#312e81',
+    hair: '#111827', hairShine: '#1e293b',
     outfit: '#64748b', outfitShade: '#475569', outfitLight: '#94a3b8',
     eyeColor: '#334155', irisLight: '#475569',
     cheek: '#94a3b8', cheekOpacity: 0.2,
@@ -240,13 +240,25 @@ export default function Avatar3D({ score = 70, size = 160 }) {
         height={size}
         style={{ overflow: 'visible', position: 'relative', zIndex: 1, animation: cfg.bodyAnim }}
       >
-        {/* ── BACK HAIR (rendered before face so face covers it) ── */}
-        <ellipse cx="100" cy="78" rx="57" ry="50" fill={cfg.hair}/>
-        {/* Hair sides flowing down */}
-        <path d="M 43 90 Q 36 130 42 175 Q 50 155 52 130 Q 56 110 58 90 Z" fill={cfg.hair}/>
-        <path d="M 157 90 Q 164 130 158 175 Q 150 155 148 130 Q 144 110 142 90 Z" fill={cfg.hair}/>
-        {/* Hair shine streak */}
-        <path d="M 80 36 Q 90 46 88 62" stroke={cfg.hairShine} strokeWidth="6" fill="none" strokeLinecap="round" opacity="0.5"/>
+        {/* ── BACK HAIR — straight, below-shoulder length ── */}
+        {/* Main hair body: hugs head at top, hangs straight to y=210 */}
+        <path
+          d="M 44 96 Q 44 28 100 26 Q 156 28 156 96 L 160 210 Q 156 216 148 216 L 52 216 Q 44 216 40 210 Z"
+          fill={cfg.hair}
+        />
+        {/* Subtle inner hair shading — depth on the hanging portion */}
+        <path
+          d="M 52 130 L 54 216 L 66 216 L 62 130 Z"
+          fill={cfg.hairShine} opacity="0.18"
+        />
+        <path
+          d="M 148 130 L 146 216 L 134 216 L 138 130 Z"
+          fill={cfg.hairShine} opacity="0.18"
+        />
+        {/* Hair shine streak — highlight running down left of center */}
+        <path d="M 82 30 Q 84 60 83 90 Q 82 130 83 180" stroke="white" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.12"/>
+        {/* Second subtle shine */}
+        <path d="M 90 28 Q 91 55 90 85" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.08"/>
 
         {/* ── EARS (before face) ── */}
         <ellipse cx="47" cy="93" rx="12" ry="16" fill={cfg.skin}/>
@@ -276,18 +288,18 @@ export default function Avatar3D({ score = 70, size = 160 }) {
         {/* ── MOUTH ── */}
         <Mouth expression={cfg.expression}/>
 
-        {/* ── FRONT BANGS (over face, forehead only — bottom edge at y=74, eyes at y=77+) ── */}
+        {/* ── FRONT BANGS (over face — straight-cut bangs, bottom edge y=72) ── */}
         <path
-          d="M 52 74 Q 56 32 100 30 Q 144 32 148 74 Q 128 56 100 54 Q 72 56 52 74 Z"
+          d="M 50 72 Q 54 28 100 26 Q 146 28 150 72 Q 130 56 100 54 Q 70 56 50 72 Z"
           fill={cfg.hair}
         />
-        {/* Bang inner shadow */}
+        {/* Bang underside shadow for depth */}
         <path
-          d="M 52 74 Q 72 56 100 54 Q 128 56 148 74 Q 128 62 100 60 Q 72 62 52 74 Z"
-          fill={cfg.hairShine} opacity="0.25"
+          d="M 50 72 Q 70 60 100 58 Q 130 60 150 72 Q 130 66 100 64 Q 70 66 50 72 Z"
+          fill="black" opacity="0.15"
         />
-        {/* Hair shine on bangs */}
-        <path d="M 78 36 Q 84 48 82 58" stroke={cfg.hairShine} strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.4"/>
+        {/* Shine on bangs */}
+        <path d="M 80 30 Q 82 44 81 56" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.12"/>
 
         {/* ── HAIR CLIP (cute star, only when mood ok+) ── */}
         {score >= 40 && (
