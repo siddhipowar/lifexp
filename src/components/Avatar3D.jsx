@@ -328,9 +328,6 @@ export default function Avatar3D({ score = 70, size = 160 }) {
           'rotate(6 33 166)'
         }>
           <rect x="18" y="166" width="30" height="52" rx="15" fill={cfg.outfit}/>
-          {/* Hand: circle centered at bottom of arm rect */}
-          <circle cx="33" cy="220" r="13" fill={cfg.skin}/>
-          <circle cx="33" cy="220" r="10" fill={cfg.skinShade} opacity="0.25"/>
         </g>
 
         <g transform={
@@ -340,8 +337,6 @@ export default function Avatar3D({ score = 70, size = 160 }) {
           'rotate(-6 167 166)'
         }>
           <rect x="152" y="166" width="30" height="52" rx="15" fill={cfg.outfit}/>
-          <circle cx="167" cy="220" r="13" fill={cfg.skin}/>
-          <circle cx="167" cy="220" r="10" fill={cfg.skinShade} opacity="0.25"/>
         </g>
 
         {/* ── SPARKLES (ecstatic / happy) ── */}
