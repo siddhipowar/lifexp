@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts'
 import { Trophy, Flame, Star, RotateCcw, Download, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
+import { getLevelTitle } from '../lib/levelTitle'
 
 function BackupRestore() {
   const fileRef = useRef()
@@ -66,13 +67,6 @@ function BackupRestore() {
   )
 }
 
-function getLevelTitle(level) {
-  if (level <= 3) return 'Signal Apprentice'
-  if (level <= 6) return 'LiDAR Ranger'
-  if (level <= 10) return 'Sensor Mage'
-  if (level <= 15) return 'Quantum Engineer'
-  return 'Architect of Worlds'
-}
 
 const ACHIEVEMENTS = [
   { id: 'first_quest', emoji: '⚔️', title: 'First Quest', desc: 'Completed your first quest', check: (q) => q.filter(x => x.completed).length >= 1 },
@@ -128,7 +122,7 @@ export default function Profile() {
               <h1 className="font-display text-2xl font-black text-rose-950">{user.name}</h1>
             </div>
             <p className="text-sm text-purple-600 font-semibold mb-1">✨ {user.avatarClass}</p>
-            <p className="text-xs text-rose-400 mb-3">Level {user.level} · {getLevelTitle(user.level)}</p>
+            <p className="text-xs text-rose-400 mb-3">Level {user.level} · {getLevelTitle(user.level, user.stats, quests)}</p>
 
             {/* XP bar */}
             <div className="xp-bar mb-1">
@@ -198,26 +192,32 @@ export default function Profile() {
 
       {/* Level progress */}
       <div className="card p-5">
-        <p className="text-xs font-bold text-pink-400 uppercase tracking-wider mb-3">Level Roadmap</p>
+        <p className="text-xs font-bold text-pink-400 uppercase tracking-wider mb-3">Your Path</p>
         {[
-          { range: '1–3', title: 'Signal Apprentice', emoji: '🌱' },
-          { range: '4–6', title: 'LiDAR Ranger', emoji: '📡' },
-          { range: '7–10', title: 'Sensor Mage', emoji: '🔮' },
-          { range: '11–15', title: 'Quantum Engineer', emoji: '⚡' },
-          { range: '16+', title: 'Architect of Worlds', emoji: '🌌' },
+          { startLevel: 1,  range: '1–3',  emoji: '🌱' },
+          { startLevel: 4,  range: '4–6',  emoji: '🌿' },
+          { startLevel: 7,  range: '7–9',  emoji: '✨' },
+          { startLevel: 10, range: '10–12', emoji: '⚡' },
+          { startLevel: 13, range: '13+',  emoji: '🌌' },
         ].map((tier, i) => {
-          const active = getLevelTitle(user.level) === tier.title
+          const title = getLevelTitle(tier.startLevel, user.stats, quests)
+          const currentTier = Math.min(4, Math.floor((user.level - 1) / 3))
+          const thisTier = i
+          const active = currentTier === thisTier
+          const past = currentTier > thisTier
           return (
             <div key={i} className={`flex items-center gap-3 py-2 ${i < 4 ? 'border-b border-pink-50' : ''}`}>
-              <span className="text-xl w-8">{tier.emoji}</span>
+              <span className={`text-xl w-8 ${past ? 'grayscale opacity-40' : ''}`}>{tier.emoji}</span>
               <div className="flex-1">
-                <p className={`text-sm font-semibold ${active ? 'text-rose-900' : 'text-rose-400'}`}>{tier.title}</p>
+                <p className={`text-sm font-semibold ${active ? 'text-rose-900' : past ? 'text-rose-300' : 'text-rose-400'}`}>{title}</p>
                 <p className="text-xs text-rose-300">Level {tier.range}</p>
               </div>
               {active && <span className="text-xs bg-pink-100 text-pink-600 font-bold px-2 py-0.5 rounded-full">Current</span>}
+              {past && <span className="text-xs text-rose-300">✓</span>}
             </div>
           )
         })}
+        <p className="text-xs text-rose-400 text-center mt-3">Titles reflect your actual journey</p>
       </div>
 
       {/* Backup / Restore */}
