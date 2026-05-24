@@ -5,6 +5,7 @@ import QuestCard from '../components/QuestCard'
 import XPBar from '../components/XPBar'
 import Avatar3D from '../components/Avatar3D'
 import { Zap, Heart, Flame, ArrowRight, Clock } from 'lucide-react'
+import { getLevelTitle } from '../lib/levelTitle'
 
 const MOODS = [
   { value: 1, emoji: '😴', label: 'Drained' },
@@ -14,13 +15,6 @@ const MOODS = [
   { value: 5, emoji: '🔥', label: 'On fire' },
 ]
 
-function getLevelTitle(level) {
-  if (level <= 3) return 'Signal Apprentice'
-  if (level <= 6) return 'LiDAR Ranger'
-  if (level <= 10) return 'Sensor Mage'
-  if (level <= 15) return 'Quantum Engineer'
-  return 'Architect of Worlds'
-}
 
 export default function Dashboard() {
   const user = useAppStore((s) => s.user)
@@ -158,7 +152,7 @@ export default function Dashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="font-display text-xl font-bold text-rose-950 leading-tight">{user.name}</h2>
-              <p className="text-xs text-purple-500 mt-0.5">{getLevelTitle(user.level)} · {user.avatarClass}</p>
+              <p className="text-xs text-purple-500 mt-0.5">{getLevelTitle(user.level, user.stats, quests)} · {user.avatarClass}</p>
             </div>
             <div className="flex-shrink-0 text-right">
               <p className="text-xl font-black text-amber-500 leading-none">🪙 {user.coins}</p>

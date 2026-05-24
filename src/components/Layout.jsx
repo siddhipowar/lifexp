@@ -4,6 +4,7 @@ import { Home, Sword, Sparkles, Heart, MessageCircle, FileText, ShoppingBag, Use
 import { useState } from 'react'
 import XPBar from './XPBar'
 import ImpulseCheck from './ImpulseCheck'
+import { getLevelTitle } from '../lib/levelTitle'
 
 const navItems = [
   { to: '/app/dashboard', icon: Home,          label: 'Home',     color: 'from-rose-400 to-pink-500',      iconBg: 'bg-rose-50    text-rose-500' },
@@ -19,6 +20,7 @@ const navItems = [
 
 export default function Layout() {
   const user     = useAppStore((s) => s.user)
+  const quests   = useAppStore((s) => s.quests)
   const xpNeeded = useAppStore((s) => s.xpNeeded)()
   const [mobileOpen,  setMobileOpen]  = useState(false)
   const [impulseOpen, setImpulseOpen] = useState(false)
@@ -71,7 +73,7 @@ export default function Layout() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-rose-900 truncate leading-tight">{user.name}</p>
-                <p className="text-xs text-purple-500 truncate">{getLevelTitle(user.level)}</p>
+                <p className="text-xs text-purple-500 truncate">{getLevelTitle(user.level, user.stats, quests)}</p>
               </div>
               <div className="flex-shrink-0 text-right">
                 <p className="text-xs font-black text-amber-500">🪙{user.coins}</p>
@@ -242,10 +244,3 @@ export default function Layout() {
   )
 }
 
-function getLevelTitle(level) {
-  if (level <= 3)  return 'Signal Apprentice'
-  if (level <= 6)  return 'LiDAR Ranger'
-  if (level <= 10) return 'Sensor Mage'
-  if (level <= 15) return 'Quantum Engineer'
-  return 'Architect of Worlds'
-}
