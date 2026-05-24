@@ -1,7 +1,14 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-const LEVEL_XP = (n) => Math.floor(300 * Math.pow(1.4, n))
+// XP needed to level up from level n
+// At ~170 XP/day average (3 quests + 3 habits, ~70% consistency):
+//   Lv 1→2 : 30,000 XP ≈ 6 months
+//   Lv 2→3 : 39,000 XP ≈ 8 months
+//   Lv 3→4 : 51,000 XP ≈ 10 months
+//   Lv 4→5 : 66,000 XP ≈ 13 months (just over a year)
+//   Lv 5+  : keeps scaling — reaching Lv 10 is a multi-year achievement
+const LEVEL_XP = (n) => Math.floor(30000 * Math.pow(1.3, n - 1))
 
 const defaultUser = {
   name: 'Signal Ranger',
