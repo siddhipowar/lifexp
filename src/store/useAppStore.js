@@ -24,6 +24,7 @@ const defaultUser = {
   identityAnchors: [],
   streakDays: 0,
   lastActiveDate: null,
+  lastResetDate: null,
 }
 
 export const useAppStore = create(
@@ -51,15 +52,28 @@ export const useAppStore = create(
       // ─── Daily reset (call on app load) ───────────────────────────────────────
       checkDailyReset: () => {
         const s = get()
-        const today = new Date().toISOString().split('T')[0]
-        const lastActive = s.user.lastActiveDate
+        const now = new Date()
+        const today = now.toISOString().split('T')[0]
+        const lastActive   = s.user.lastActiveDate
+        const lastResetDate = s.user.lastResetDate  // date the snapshot was last taken
 
-        // Nothing to do if we already ran today or no prior date
-        if (!lastActive || lastActive === today) {
-          // Just update lastActiveDate to today
+        // Always mark active so the app knows we visited today
+        if (lastActive !== today) {
           set((s) => ({ user: { ...s.user, lastActiveDate: today } }))
-          return
         }
+
+        // Nothing to snapshot if we already ran today
+        if (lastResetDate === today) return
+
+        // It's a new day — but only snapshot after 6:30 AM so the report
+        // captures a full day, not a mid-day open.
+        const hours      = now.getHours()
+        const minutes    = now.getMinutes()
+        const pastCutoff = hours > 6 || (hours === 6 && minutes >= 30)
+        if (!pastCutoff) return  // come back after 6:30
+
+        // Need a prior day to snapshot — skip on very first use
+        if (!lastActive || lastActive === today) return
 
         // A new day has arrived — snapshot yesterday's performance
         const yesterday = lastActive
@@ -105,7 +119,7 @@ export const useAppStore = create(
         set((s) => ({
           quests: updatedQuests,
           dailySummaries: [summary, ...s.dailySummaries].slice(0, 90), // keep 90 days
-          user: { ...s.user, lastActiveDate: today },
+          user: { ...s.user, lastActiveDate: today, lastResetDate: today },
         }))
       },
 
@@ -242,7 +256,7 @@ export const useAppStore = create(
         // Always merge saved state with current defaults — never wipe
         return {
           ...saved,
-          user: { ...defaultUser, ...saved.user },
+          user: { ...defaultUser, ...saved.user, lastResetDate: saved.user?.lastResetDate ?? null },
           quests:         saved.quests         ?? [],
           habits:         saved.habits         ?? [],
           calendarEvents: saved.calendarEvents ?? [],
