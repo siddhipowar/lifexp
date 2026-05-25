@@ -6,6 +6,7 @@ import XPBar from '../components/XPBar'
 import Avatar3D from '../components/Avatar3D'
 import { Zap, Heart, Flame, ArrowRight, Clock } from 'lucide-react'
 import { getLevelTitle } from '../lib/levelTitle'
+import { getDoNowQuests, getTimeSlot, SLOT_LABELS } from '../lib/smartQuests'
 
 const MOODS = [
   { value: 1, emoji: '😴', label: 'Drained' },
@@ -30,8 +31,17 @@ export default function Dashboard() {
   const hasMoodToday = user.lastMoodDate === today
   const activeQuests = quests.filter(q => !q.completed)
   const soulQuest = activeQuests.find(q => q.category === 'soul')
-  const priorityQuests = activeQuests.filter(q => q.category !== 'soul').sort((a, b) => a.priority - b.priority).slice(0, 3)
-  const justOne = activeQuests.sort((a, b) => a.priority - b.priority)[0]
+
+  // Smart ranking
+  const slot      = getTimeSlot()
+  const slotMeta  = SLOT_LABELS[slot]
+  const doNow     = getDoNowQuests(
+    activeQuests.filter(q => q.category !== 'soul'),
+    user.moodToday,
+    slot,
+    3,
+  )
+  const justOne = doNow[0] ?? activeQuests[0]
   const completedToday = quests.filter(q => q.completed && q.completedAt?.startsWith(today)).length
   const habitsToday = habits.filter(h => h.completedDates?.includes(today)).length
   const totalTodayQuests = completedToday + activeQuests.filter(q => q.scheduledDay === 'today').length
@@ -242,24 +252,50 @@ export default function Dashboard() {
 
       {/* Today's quests or Just One */}
       {justOneMode && justOne ? (
-        <QuestCard quest={justOne} />
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-base">{slotMeta.emoji}</span>
+            <p className="text-xs font-bold text-pink-500 uppercase tracking-wider">{slotMeta.label}</p>
+          </div>
+          <QuestCard quest={justOne} />
+          {justOne._reason && (
+            <p className="text-xs text-purple-400 mt-1.5 pl-1">{justOne._reason}</p>
+          )}
+        </div>
       ) : (
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <Zap size={14} className="text-pink-500" />
-              <p className="text-xs font-bold text-pink-500 uppercase tracking-wider">up next</p>
+              <span className="text-base">{slotMeta.emoji}</span>
+              <div>
+                <p className="text-xs font-bold text-pink-500 uppercase tracking-wider leading-none">{slotMeta.label}</p>
+                <p className="text-[11px] text-rose-300 mt-0.5">{slotMeta.sub}</p>
+              </div>
             </div>
             <button onClick={() => navigate('/app/quests')} className="text-xs text-purple-500 hover:text-purple-700 flex items-center gap-1">
               View all <ArrowRight size={12} />
             </button>
           </div>
-          {priorityQuests.length > 0 ? (
-            <div className="space-y-3">
-              {priorityQuests.map(q => <QuestCard key={q.id} quest={q} />)}
+
+          {doNow.length > 0 ? (
+            <div className="space-y-3 mt-3">
+              {doNow.map((q, i) => (
+                <div key={q.id}>
+                  <QuestCard quest={q} />
+                  {q._reason && (
+                    <p className="text-[11px] text-purple-400 mt-1 pl-1 flex items-center gap-1">
+                      <span className={i === 0 ? 'text-pink-400' : ''}>
+                        {i === 0 ? '✦ do this now' : `#${i + 1}`}
+                      </span>
+                      <span className="text-rose-300">·</span>
+                      {q._reason}
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           ) : (
-            <div className="card p-6 text-center">
+            <div className="card p-6 text-center mt-3">
               <p className="text-2xl mb-2">🎉</p>
               <p className="text-sm font-semibold text-rose-700">you're clear ✓</p>
               <p className="text-xs text-rose-400 mt-1">drop more into the brain dump whenever</p>
