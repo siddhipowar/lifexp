@@ -5,18 +5,22 @@ import { GUIDE_SYSTEM } from '../lib/prompts'
 import { Send, Loader, Sparkles } from 'lucide-react'
 
 const QUICK_PROMPTS = [
-  { label: '😵 I feel overwhelmed', value: 'I feel completely overwhelmed right now. What is the one thing I should do?' },
-  { label: '📅 Plan my week', value: 'Help me plan my week. Look at my quests and suggest a realistic weekly schedule.' },
-  { label: '💔 Feeling dependent', value: "I'm feeling emotionally dependent on someone and I know it's not good. Help me ground myself." },
-  { label: '💼 Job search help', value: 'I need motivation and tactical advice for my AV/robotics job search. What should I focus on right now?' },
-  { label: '🌸 Be my hype person', value: 'I need you to remind me who I am and what I\'m capable of. Be direct and honest.' },
+  { label: '⚡ What should I do right now?', value: 'Look at my quests, mood, and calendar — what is the single best thing I should do right now?' },
+  { label: '😵 I feel overwhelmed',           value: 'I feel completely overwhelmed right now. Look at everything on my plate and tell me the ONE thing to focus on.' },
+  { label: '📅 Review my week',               value: 'Review my upcoming calendar and active quests. Am I on track? What am I missing or over-scheduling?' },
+  { label: '🔥 Habit check',                  value: 'Look at my habits and streaks. Which ones need attention? What should I build next?' },
+  { label: '🌸 Remind me who I am',           value: "Remind me of my identity anchors and what I'm building toward. Be direct and honest — no fluff." },
 ]
 
 export default function Guide() {
-  const user = useAppStore((s) => s.user)
-  const quests = useAppStore((s) => s.quests)
-  const guideMessages = useAppStore((s) => s.guideMessages)
-  const addMessage = useAppStore((s) => s.addMessage)
+  const user           = useAppStore((s) => s.user)
+  const quests         = useAppStore((s) => s.quests)
+  const habits         = useAppStore((s) => s.habits)
+  const calendarEvents = useAppStore((s) => s.calendarEvents)
+  const soulEntries    = useAppStore((s) => s.soulEntries)
+  const dailySummaries = useAppStore((s) => s.dailySummaries)
+  const guideMessages  = useAppStore((s) => s.guideMessages)
+  const addMessage     = useAppStore((s) => s.addMessage)
 
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -36,10 +40,9 @@ export default function Guide() {
     setLoading(true)
 
     try {
-      const recentMood = user.moodToday
       const history = guideMessages.slice(-8).map(m => ({ role: m.role, content: m.content }))
       const response = await callClaude({
-        system: GUIDE_SYSTEM(user, quests, recentMood),
+        system: GUIDE_SYSTEM(user, quests, habits, calendarEvents, soulEntries, dailySummaries),
         messages: [...history, { role: 'user', content: userMsg }],
         maxTokens: 400,
       })

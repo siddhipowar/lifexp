@@ -1,6 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
-import { Home, Sword, Sparkles, Heart, MessageCircle, FileText, ShoppingBag, User, CalendarDays, Menu, X } from 'lucide-react'
+import { Home, Sword, Sparkles, Heart, MessageCircle, FileText, ShoppingBag, User, CalendarDays, Map, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import XPBar from './XPBar'
 import ImpulseCheck from './ImpulseCheck'
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/app/my-life',   icon: FileText,       label: 'My Life',  color: 'from-amber-400 to-orange-500',   iconBg: 'bg-amber-50   text-amber-500' },
   { to: '/app/calendar',  icon: CalendarDays,   label: 'Calendar', color: 'from-teal-400 to-cyan-500',      iconBg: 'bg-teal-50    text-teal-500' },
   { to: '/app/shop',      icon: ShoppingBag,    label: 'Shop',     color: 'from-yellow-400 to-amber-500',   iconBg: 'bg-yellow-50  text-yellow-600' },
+  { to: '/app/journey',   icon: Map,            label: 'Journey',  color: 'from-fuchsia-400 to-violet-500', iconBg: 'bg-fuchsia-50 text-fuchsia-500' },
   { to: '/app/profile',   icon: User,           label: 'Profile',  color: 'from-pink-400 to-rose-500',      iconBg: 'bg-pink-50    text-pink-500' },
 ]
 
@@ -217,7 +218,7 @@ export default function Layout() {
           boxShadow: '0 8px 32px rgba(200,80,150,0.15), 0 2px 8px rgba(0,0,0,0.06)',
         }}
       >
-        {navItems.slice(0, 5).map(({ to, icon: Icon, label, color }) => (
+        {[navItems[0], navItems[1], navItems[4], navItems[9], navItems[8]].map(({ to, icon: Icon, label, color }) => (
           <NavLink
             key={to}
             to={to}

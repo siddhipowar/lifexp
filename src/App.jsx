@@ -13,6 +13,7 @@ import MasterDocument from './pages/MasterDocument'
 import Shop from './pages/Shop'
 import Profile from './pages/Profile'
 import Calendar from './pages/Calendar'
+import Journey from './pages/Journey'
 import Notifications from './components/Notifications'
 
 function AppRoutes() {
@@ -44,6 +45,7 @@ function AppRoutes() {
         <Route path="shop"           element={<Shop />} />
         <Route path="profile"        element={<Profile />} />
         <Route path="calendar"       element={<Calendar />} />
+        <Route path="journey"        element={<Journey />} />
       </Route>
     </Routes>
   )
