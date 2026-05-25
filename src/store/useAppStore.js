@@ -25,6 +25,7 @@ const defaultUser = {
   streakDays: 0,
   lastActiveDate: null,
   lastResetDate: null,
+  journeyMilestones: [],  // array of completed milestone IDs
 }
 
 export const useAppStore = create(
@@ -256,6 +257,12 @@ export const useAppStore = create(
       // ─── Notifications ────────────────────────────────────────────────────────
       clearNotification: (id) => set((s) => ({ notifications: s.notifications.filter((n) => n.id !== id) })),
 
+      toggleJourneyMilestone: (id) => set((s) => ({
+        journeyMilestones: s.journeyMilestones.includes(id)
+          ? s.journeyMilestones.filter(x => x !== id)
+          : [...s.journeyMilestones, id],
+      })),
+
       resetOnboarding: () => set({ user: defaultUser }),
     }),
     {
@@ -274,7 +281,8 @@ export const useAppStore = create(
           impulseChecks:  saved.impulseChecks  ?? [],
           shopItems:      saved.shopItems      ?? [],
           guideMessages:  saved.guideMessages  ?? [],
-          notifications:  saved.notifications  ?? [],
+          notifications:       saved.notifications       ?? [],
+          journeyMilestones:   saved.journeyMilestones   ?? [],
         }
       },
     }
