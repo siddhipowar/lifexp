@@ -127,8 +127,8 @@ export default function Journey() {
         <div className="h-full bg-gradient-to-r from-violet-400 to-fuchsia-500 rounded-full transition-all duration-700" style={{ width: `${progress}%` }}/>
       </div>
 
-      {/* Map container — scrollable */}
-      <div className="rounded-3xl overflow-hidden shadow-2xl border border-violet-900/30" style={{ overflowY: 'auto', maxHeight: '72vh' }}>
+      {/* Map — full size, page scrolls naturally */}
+      <div className="rounded-3xl shadow-2xl border border-violet-900/30" style={{ overflow: 'hidden' }}>
         <svg
           ref={svgRef}
           viewBox="0 0 480 900"
