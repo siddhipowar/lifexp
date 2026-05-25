@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAppStore } from './store/useAppStore'
 import Landing from './pages/Landing'
@@ -20,7 +20,7 @@ function AppRoutes() {
   const checkDailyReset     = useAppStore((s) => s.checkDailyReset)
 
   // Run once on mount — rolls over quests if a new day has started
-  useState(() => { checkDailyReset() }, [])
+  useEffect(() => { checkDailyReset() }, [])
 
   return (
     <Routes>

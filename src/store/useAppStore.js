@@ -164,21 +164,30 @@ export const useAppStore = create(
       })),
 
       completeQuest: (id) => set((s) => {
-        const quest = s.quests.find((q) => q.id === id)
+        const quest = s.quests.find((q) => String(q.id) === String(id))
         if (!quest || quest.completed) return s
         const xpMap = { soul: 'soul', career: 'ambition', learning: 'intelligence', health: 'discipline', work: 'ambition', personal: 'resilience', relationships: 'connection' }
-        const notification = { id: Date.now(), type: 'xp', message: `+${quest.xp} XP ✨ +${quest.coins} 🪙`, questTitle: quest.title }
-        const newXP     = s.user.xp + quest.xp
+        const xpGain    = Number(quest.xp)    || 0
+        const coinsGain = Number(quest.coins) || 0
+        const statKey   = xpMap[quest.category] || 'resilience'
+        const notification = { id: Date.now(), type: 'xp', message: `+${xpGain} XP ✨ +${coinsGain} 🪙`, questTitle: quest.title }
+        const newXP     = (Number(s.user.xp) || 0) + xpGain
         const xpNeeded  = LEVEL_XP(s.user.level)
         const leveledUp = newXP >= xpNeeded
         return {
-          quests: s.quests.map((q) => q.id === id ? { ...q, completed: true, completedAt: new Date().toISOString() } : q),
+          quests: s.quests.map((q) => String(q.id) === String(id)
+            ? { ...q, completed: true, completedAt: new Date().toISOString() }
+            : q
+          ),
           user: {
             ...s.user,
             xp:    leveledUp ? newXP - xpNeeded : newXP,
             level: leveledUp ? s.user.level + 1 : s.user.level,
-            coins: s.user.coins + quest.coins,
-            stats: { ...s.user.stats, [xpMap[quest.category] || 'resilience']: Math.min(100, (s.user.stats[xpMap[quest.category] || 'resilience'] || 0) + Math.floor(quest.xp / 10)) }
+            coins: (Number(s.user.coins) || 0) + coinsGain,
+            stats: {
+              ...s.user.stats,
+              [statKey]: Math.min(100, (Number(s.user.stats[statKey]) || 0) + Math.floor(xpGain / 10))
+            },
           },
           notifications: [...s.notifications, notification],
         }

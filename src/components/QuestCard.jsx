@@ -1,6 +1,6 @@
 import { Check, Clock, Trash2, ChevronDown } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 const CATEGORY = {
   career:        { gradient: 'from-blue-500 to-cyan-400',    bg: 'bg-blue-50',   text: 'text-blue-700',   bar: 'bg-blue-400',   emoji: '💼', label: 'Career' },
@@ -25,17 +25,23 @@ export default function QuestCard({ quest, showDelete = false }) {
   const [completing, setCompleting] = useState(false)
   const [justDone, setJustDone]     = useState(false)
 
-  const cat  = CATEGORY[quest.category] || CATEGORY.personal
-  const pri  = PRIORITY_CONFIG[quest.priority] || PRIORITY_CONFIG[3]
+  const cat       = CATEGORY[quest.category] || CATEGORY.personal
+  const pri       = PRIORITY_CONFIG[quest.priority] || PRIORITY_CONFIG[3]
+  const timerRef  = useRef(null)
+
+  // Clean up animation timer on unmount
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current) }, [])
 
   const handleComplete = () => {
     if (quest.completed || completing) return
+    // Mark in store immediately — don't wait for animation
+    completeQuest(quest.id)
+    // Play animation on top of the store update
     setCompleting(true)
-    setTimeout(() => {
-      completeQuest(quest.id)
+    timerRef.current = setTimeout(() => {
       setCompleting(false)
       setJustDone(true)
-    }, 350)
+    }, 300)
   }
 
   return (
